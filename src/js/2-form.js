@@ -8,7 +8,7 @@ const STORAGE_KEY = "feedback-form-state";
 const form = document.querySelector(".feedback-form");
 
 if (form) {
-  // 2. Завантаження даних з localStorage (і в інпути, і в formData)
+  // 2. Завантаження даних з localStorage при завантаженні сторінки
   const savedData = localStorage.getItem(STORAGE_KEY);
   if (savedData) {
     try {
@@ -24,20 +24,28 @@ if (form) {
     }
   }
 
-  // 3. Слухач input (оновлює і localStorage, і глобальний formData)
+  // 3. Слухач input (без .trim(), щоб зберігати точний вміст полів)
   form.addEventListener("input", (event) => {
     const { name, value } = event.target;
     
-    formData[name] = value.trim();
+    formData[name] = value;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
   });
 
-  // 4. Слухач submit (вивід у консоль, очищення сховища, скидання форми і formData)
+  // 4. Слухач submit з перевіркою на заповненість полів
   form.addEventListener("submit", (event) => {
     event.preventDefault();
 
+    // Перевіряємо, чи і email, і message не є порожніми (або не складаються лише з пробілів)
+    if (!formData.email.trim() || !formData.message.trim()) {
+      alert("Fill in all fields"); // Або інше повідомлення про заповнення полів
+      return; // Блокуємо подальше виконання (логування, очищення)
+    }
+
+    // Логування відбувається ТІЛЬКИ після успішної валідації
     console.log("Submitted formData:", formData);
 
+    // Очищення сховища, форми та скидання об'єкта
     localStorage.removeItem(STORAGE_KEY);
     form.reset();
 
