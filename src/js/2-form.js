@@ -8,7 +8,7 @@ const STORAGE_KEY = "feedback-form-state";
 const form = document.querySelector(".feedback-form");
 
 if (form) {
-  // 2. Завантаження даних з localStorage при завантаженні сторінки
+  // Відновлення даних із localStorage при завантаженні сторінки
   const savedData = localStorage.getItem(STORAGE_KEY);
   if (savedData) {
     try {
@@ -24,7 +24,7 @@ if (form) {
     }
   }
 
-  // 3. Слухач input (без .trim(), щоб зберігати точний вміст полів)
+  // 2. Слухач input: значення зберігаються у formData БЕЗ .trim()
   form.addEventListener("input", (event) => {
     const { name, value } = event.target;
     
@@ -32,20 +32,20 @@ if (form) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
   });
 
-  // 4. Слухач submit з перевіркою на заповненість полів
+  // 3. Слухач submit з перевіркою валідації
   form.addEventListener("submit", (event) => {
     event.preventDefault();
 
-    // Перевіряємо, чи і email, і message не є порожніми (або не складаються лише з пробілів)
+    // Перевірка: якщо хоча б одне поле порожнє (або з одних пробілів)
     if (!formData.email.trim() || !formData.message.trim()) {
-      alert("Fill in all fields"); // Або інше повідомлення про заповнення полів
-      return; // Блокуємо подальше виконання (логування, очищення)
+      alert("Fill in all fields"); // Повідомлення про заповнення
+      return; // Блокуємо подальше виконання (логування, очищення тощо)
     }
 
-    // Логування відбувається ТІЛЬКИ після успішної валідації
+    // ЛОГУВАННЯ ВІДБУВАЄТЬСЯ ТІЛЬКИ ПІСЛЯ УСПІШНОЇ ВАЛІДАЦІЇ
     console.log("Submitted formData:", formData);
 
-    // Очищення сховища, форми та скидання об'єкта
+    // Очищення сховища, форми та скидання об'єкта до початкового стану
     localStorage.removeItem(STORAGE_KEY);
     form.reset();
 
