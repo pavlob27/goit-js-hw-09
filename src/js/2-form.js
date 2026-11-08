@@ -1,63 +1,47 @@
-const STORAGE_KEY = 'feedback-form-state';
+// 1. Глобальний об'єкт formData
+const formData = {
+  email: "",
+  message: ""
+};
 
-const form = document.querySelector('.feedback-form');
-const input = document.querySelector('input');
-const textarea = document.querySelector('textarea');
+const STORAGE_KEY = "feedback-form-state";
+const form = document.querySelector(".feedback-form");
 
+if (form) {
+  // 2. Завантаження даних з localStorage (і в інпути, і в formData)
+  const savedData = localStorage.getItem(STORAGE_KEY);
+  if (savedData) {
+    try {
+      const parsedData = JSON.parse(savedData);
+      
+      formData.email = parsedData.email || "";
+      formData.message = parsedData.message || "";
 
-function saveToLS(key, value) {
-  const data = JSON.stringify(value);
-  localStorage.setItem(key, data);
+      if (form.elements.email) form.elements.email.value = formData.email;
+      if (form.elements.message) form.elements.message.value = formData.message;
+    } catch (error) {
+      console.error("Error parsing localStorage data", error);
+    }
+  }
+
+  // 3. Слухач input (оновлює і localStorage, і глобальний formData)
+  form.addEventListener("input", (event) => {
+    const { name, value } = event.target;
+    
+    formData[name] = value.trim();
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+  });
+
+  // 4. Слухач submit (вивід у консоль, очищення сховища, скидання форми і formData)
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+
+    console.log("Submitted formData:", formData);
+
+    localStorage.removeItem(STORAGE_KEY);
+    form.reset();
+
+    formData.email = "";
+    formData.message = "";
+  });
 }
-
-function loadFromLS(key) {
-  const json = localStorage.getItem(key);
-
-  try {
-    const data = JSON.parse(json);
-    return data;
-  } catch (err) {
-    console.log(err);
-    return json;
-  }
-}
-
-form.addEventListener('input', e => {
-  e.preventDefault();
-  const formData = new FormData(form);
-
-  const data = {
-    email: formData.get('email'),
-    message: formData.get('message'),
-  };
-
-  saveToLS(STORAGE_KEY, data);
-});
-
-document.addEventListener('DOMContentLoaded', () => {
-  const data = loadFromLS(STORAGE_KEY);
-
-  if (data) {
-    form.elements.email.value = data.email;
-    form.elements.message.value = data.message;
-  }
-});
-
-form.addEventListener('submit', e => {
-  e.preventDefault();
-  const formdata = new FormData(form);
-  const email = formdata.get('email');
-  const message = formdata.get('message');
-
-  const trimEmail = email.trim();
-  const trimMessage = message.trim();
-
-  if (trimEmail === '' || trimMessage === '') {
-    alert('All form fields must be filled in');
-    return;
-  }
-
-
-  localStorage.removeItem(STORAGE_KEY);
-  e.target.reset();
-});
